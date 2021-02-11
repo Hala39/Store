@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210207102422_OPrice")]
-    partial class OPrice
+    [Migration("20210211065345_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,39 @@ namespace Infrastructure.Migrations
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.2");
+
+            modelBuilder.Entity("Core.Entities.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Apartment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("District")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Governorate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Street")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Addresses");
+                });
 
             modelBuilder.Entity("Core.Entities.Cart", b =>
                 {
@@ -107,7 +140,45 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CartId");
 
+                    b.HasIndex("OrderId");
+
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<DateTime?>("Confirmation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContactEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Placement")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
@@ -303,6 +374,15 @@ namespace Infrastructure.Migrations
                     b.ToTable("Wishlists");
                 });
 
+            modelBuilder.Entity("Core.Entities.Address", b =>
+                {
+                    b.HasOne("Core.Entities.Order", null)
+                        .WithOne("Address")
+                        .HasForeignKey("Core.Entities.Address", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.Entities.Cart", b =>
                 {
                     b.HasOne("Core.Entities.User", null)
@@ -320,7 +400,23 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Core.Entities.Order", null)
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Cart");
+                });
+
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Core.Entities.Product", b =>
@@ -398,6 +494,13 @@ namespace Infrastructure.Migrations
                     b.Navigation("AvailableColors");
                 });
 
+            modelBuilder.Entity("Core.Entities.Order", b =>
+                {
+                    b.Navigation("Address");
+
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("Core.Entities.Product", b =>
                 {
                     b.Navigation("AvailableColors");
@@ -413,6 +516,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.User", b =>
                 {
                     b.Navigation("Cart");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Wishlist");
                 });

@@ -22,6 +22,9 @@ namespace Infrastructure.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Wish> Wishes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
